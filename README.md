@@ -1,36 +1,90 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# PV Tracker
 
-## Getting Started
+## Description
+The PV (Photovoltaic) Tracker is a web application designed to manage and track solar panel installed locations. Built with Next.js, React, and a PostgreSQL database, the application aims to streamline the process of monitoring and maintaining solar panel projects.
 
-First, run the development server:
+## Features
+*   **Profile Management:** Create, edit, and delete project profiles to organize.
+*   **Panel Data Upload:** Upload solar panel data via CSV or Excel files.
+*   **Interactive Dashboard:** View key statistics and insights related to solar panel location.
+*   **Panel Table View:** Browse and manage detailed information about individual solar panels.
+*   **NFC Tool Integration:** Support for NFC-enabled scanning of solar panels.
+*   **RESTful API:** Robust API endpoints for managing profiles and panel data.
+*   **Modern UI:** Built with Shadcn UI and Tailwind CSS for a responsive and aesthetically pleasing user experience.
+
+## Installation
+
+To set up the project locally, follow these steps:
+
+### Prerequisites
+*   Node.js (version 18.17.0 or higher)
+*   npm or pnpm
+*   A PostgreSQL database (e.g., NeonDB)
+
+### Steps
+
+1.  **Clone the repository:**
+    ```bash
+    git clone https://github.com/muhdfaqris/pv-tracker.git
+    ```
+
+2.  **Install dependencies:**
+    ```bash
+    npm install
+    # or
+    pnpm install
+    ```
+
+3.  **Configure environment variables:**
+    Create a `.env` file in the root of the `pv-tracker` directory and add your database connection string:
+    ```
+    DATABASE_URL="postgresql://user:password@host:port/database?sslmode=require"
+    ```
+    Replace `user`, `password`, `host`, `port`, and `database` with your PostgreSQL database credentials.
+
+4.  **Set up the database schema:**
+    Run the SQL script to create the necessary tables in your PostgreSQL database. You can use a tool like `psql` or `pgAdmin`.
+    ```bash
+    # Example using psql
+    psql -h <your-db-host> -U <your-db-user> -d <your-db-name> -f ./scripts/001-initial-schema.sql
+    ```
+
+## Usage
+
+### Development Server
+
+To run the application in development mode:
 
 ```bash
 npm run dev
 # or
-yarn dev
-# or
 pnpm dev
-# or
-bun dev
 ```
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### Building for Production
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+To build the application for production:
 
-## Learn More
+```bash
+npm run build
+# or
+pnpm build
+```
 
-To learn more about Next.js, take a look at the following resources:
+### Starting Production Server
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+To start the built application in production mode:
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+```bash
+npm start
+# or
+pnpm start
+```
 
-## Deploy on Vercel
+## Contributing
+Contributions are welcome! Please feel free to submit a pull request or open an issue.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## License
+This project is licensed under the MIT License.
