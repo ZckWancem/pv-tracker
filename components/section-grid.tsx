@@ -30,7 +30,7 @@ export function SectionGrid({ panels }: SectionGridProps) {
     return (
       <Card>
         <CardHeader>
-          <CardTitle>Section Layout</CardTitle>
+          <CardTitle>Panel Layout</CardTitle>
           <CardDescription>No sections with scanned panels yet</CardDescription>
         </CardHeader>
       </Card>
@@ -39,7 +39,7 @@ export function SectionGrid({ panels }: SectionGridProps) {
 
   return (
     <div className="space-y-6">
-      <h3 className="text-lg font-semibold">Section Layout</h3>
+      <h3 className="text-lg font-semibold">Panel Layout</h3>
       <div className="grid gap-4">
         {sections.map((sectionName) => {
           const sectionPanels = panelsBySection[sectionName]
@@ -64,7 +64,7 @@ export function SectionGrid({ panels }: SectionGridProps) {
               <CardHeader>
                 <div className="flex items-center justify-between">
                   <CardTitle>Section {sectionName}</CardTitle>
-                  <Badge variant="outline">
+                  <Badge variant="outline" className="text-black bg-stone-200">
                     {scannedPanels.length}/{sectionPanels.length} scanned
                   </Badge>
                 </div>
@@ -87,12 +87,12 @@ export function SectionGrid({ panels }: SectionGridProps) {
                                 className={`w-8 h-8 border rounded text-xs flex items-center justify-center cursor-pointer ${
                                   panel
                                     ? panel.scanned_at
-                                      ? "bg-green-500 text-white border-green-600"
-                                      : "bg-yellow-500 text-white border-yellow-600"
-                                    : "bg-gray-200 border-gray-300 dark:bg-gray-700 dark:border-gray-600"
+                                      ? "bg-green-400 text-white border-green-500 hover:bg-green-400/80"
+                                      : "bg-yellow-400 text-white border-yellow-500 hover:bg-yellow-400/80"
+                                    : "bg-gray-200 border-gray-500 dark:bg-gray-700 dark:border-gray-600"
                                 }`}
                               >
-                                {colIndex + 1}
+                                {/* {colIndex + 1} */}
                               </div>
                             </TooltipTrigger>
                             <TooltipContent>
@@ -104,9 +104,9 @@ export function SectionGrid({ panels }: SectionGridProps) {
                                   </div>
                                   <div>Pallet: {panel.pallet_no}</div>
                                   {panel.scanned_at ? (
-                                    <div className="text-green-600">✓ Scanned</div>
+                                    <div className="text-green-400">Scanned</div>
                                   ) : (
-                                    <div className="text-yellow-600">⏳ Pending</div>
+                                    <div className="text-yellow-400">Pending</div>
                                   )}
                                 </div>
                               ) : (
@@ -130,11 +130,11 @@ export function SectionGrid({ panels }: SectionGridProps) {
 
                 <div className="flex gap-4 mt-4 text-sm">
                   <div className="flex items-center gap-2">
-                    <div className="w-4 h-4 bg-green-500 rounded"></div>
+                    <div className="w-4 h-4 bg-green-400 rounded"></div>
                     <span>Scanned</span>
                   </div>
                   <div className="flex items-center gap-2">
-                    <div className="w-4 h-4 bg-yellow-500 rounded"></div>
+                    <div className="w-4 h-4 bg-yellow-400 rounded"></div>
                     <span>Pending</span>
                   </div>
                   <div className="flex items-center gap-2">

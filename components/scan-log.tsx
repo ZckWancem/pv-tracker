@@ -23,7 +23,7 @@ export function ScanLog({ logs }: ScanLogProps) {
         </CardTitle>
       </CardHeader>
       <CardContent>
-        <ScrollArea className="h-60 w-full rounded-md border p-4">
+        <ScrollArea className="h-60 w-full rounded-md border p-4 bg-stone-100">
           {logs.length === 0 ? (
             <p className="text-muted-foreground">No scan events yet.</p>
           ) : (

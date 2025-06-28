@@ -130,12 +130,12 @@ export function PanelsTable({ panels, onPanelUpdated }: PanelsTableProps) {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead className="text-left bg-gray-100 text-slate-500">Serial Code</TableHead>
-                <TableHead className="text-left bg-gray-100 text-slate-500">Pallet No</TableHead>
-                <TableHead className="text-left bg-gray-100 text-slate-500">Location</TableHead>
-                <TableHead className="text-left bg-gray-100 text-slate-500">Status</TableHead>
-                <TableHead className="text-left bg-gray-100 text-slate-500">Scanned At</TableHead>
-                <TableHead className="w-[100px] bg-gray-100 text-slate-500">Actions</TableHead>
+                <TableHead className="text-left bg-stone-200 text-black-400">Serial Code</TableHead>
+                <TableHead className="text-left bg-stone-200 text-black-400">Pallet No</TableHead>
+                <TableHead className="text-left bg-stone-200 text-black-400">Location</TableHead>
+                <TableHead className="text-left bg-stone-200 text-black-400">Status</TableHead>
+                <TableHead className="text-left bg-stone-200 text-black-400">Date</TableHead>
+                <TableHead className="w-[100px] bg-stone-200 text-black-400">Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>

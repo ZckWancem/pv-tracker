@@ -12,6 +12,7 @@ import { DashboardStats } from "@/components/dashboard-stats"
 import { SectionGrid } from "@/components/section-grid"
 import { PanelsTable } from "@/components/panels-table"
 import { NFCTestTool } from "@/components/nfc-test-tool"
+import { NfcMappingConfig } from "@/components/nfc-mapping-config"
 import { useToast } from "@/hooks/use-toast"
 import type { Profile, Panel } from "@/lib/db"
 
@@ -91,8 +92,7 @@ export default function HomePage() {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900 mx-auto"></div>
-          <p className="mt-2 text-gray-600">Loading...</p>
+          <div className="animate-spin rounded-full h-10 w-10 border-4 border-gray-300 border-t-black mx-auto"></div>
         </div>
       </div>
     )
@@ -104,7 +104,7 @@ export default function HomePage() {
         <div className="mb-8">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div className="flex items-center gap-2">
-              <ScanSearchIcon className="h-14 w-14 text-zinc-500 dark:text-white mr-2" />
+              <ScanSearchIcon className="h-14 w-14 text-stone-400 dark:text-white mr-2" />
               <div className="flex flex-col">
                 <h1 className="text-4xl font-bold text-gray-900 dark:text-white">PV Tracker</h1>
                 <p className="text-gray-600 dark:text-gray-400 text-sm">v0.0.1a</p>
@@ -124,25 +124,25 @@ export default function HomePage() {
             <TabsList className="grid w-full grid-cols-4">
               <TabsTrigger
                 value="dashboard"
-                className="data-[state=active]:bg-black data-[state=active]:text-white hover:bg-gray-300 hover:text-white dark:data-[state=active]:bg-black dark:data-[state=active]:text-white dark:hover:bg-gray-700 dark:hover:text-white"
+                className="data-[state=active]:bg-black data-[state=active]:text-white hover:bg-stone-300 hover:text-black dark:data-[state=active]:bg-black dark:data-[state=active]:text-white dark:hover:bg-gray-700 dark:hover:text-white"
               >
                 Dashboard
               </TabsTrigger>
               <TabsTrigger
                 value="upload"
-                className="data-[state=active]:bg-black data-[state=active]:text-white hover:bg-gray-300 hover:text-white dark:data-[state=active]:bg-black dark:data-[state=active]:text-white dark:hover:bg-gray-700 dark:hover:text-white"
+                className="data-[state=active]:bg-black data-[state=active]:text-white hover:bg-stone-300 hover:text-black dark:data-[state=active]:bg-black dark:data-[state=active]:text-white dark:hover:bg-gray-700 dark:hover:text-white"
               >
                 Data
               </TabsTrigger>
               <TabsTrigger
                 value="scan"
-                className="data-[state=active]:bg-black data-[state=active]:text-white hover:bg-gray-300 hover:text-white dark:data-[state=active]:bg-black dark:data-[state=active]:text-white dark:hover:bg-gray-700 dark:hover:text-white"
+                className="data-[state=active]:bg-black data-[state=active]:text-white hover:bg-stone-300 hover:text-black dark:data-[state=active]:bg-black dark:data-[state=active]:text-white dark:hover:bg-gray-700 dark:hover:text-white"
               >
                 Scan
               </TabsTrigger>
               <TabsTrigger
                 value="settings"
-                className="data-[state=active]:bg-black data-[state=active]:text-white hover:bg-gray-300 hover:text-white dark:data-[state=active]:bg-black dark:data-[state=active]:text-white dark:hover:bg-gray-700 dark:hover:text-white"
+                className="data-[state=active]:bg-black data-[state=active]:text-white hover:bg-stone-300 hover:text-black dark:data-[state=active]:bg-black dark:data-[state=active]:text-white dark:hover:bg-gray-700 dark:hover:text-white"
               >
                 Settings
               </TabsTrigger>
@@ -164,8 +164,9 @@ export default function HomePage() {
               <ScanLog logs={scanLogs} />
             </TabsContent>
 
-            <TabsContent value="settings">
+            <TabsContent value="settings" className="space-y-4">
               <NFCTestTool />
+              <NfcMappingConfig profileId={selectedProfileId} />
             </TabsContent>
           </Tabs>
         ) : (

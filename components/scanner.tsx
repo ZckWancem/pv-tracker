@@ -2,8 +2,8 @@
 
 import type React from "react"
 
-import { useState, useEffect } from "react"
-import { Scan, Smartphone, Plus, Minus } from "lucide-react"
+import { useState, useEffect, useRef } from "react" // Import useRef
+import { Scan, Smartphone, Plus, Minus, Camera } from "lucide-react" // Import Camera icon
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
@@ -11,6 +11,7 @@ import { Label } from "@/components/ui/label"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Badge } from "@/components/ui/badge"
 import { useToast } from "@/hooks/use-toast"
+import { BrowserQRCodeReader, IScannerControls } from '@zxing/browser'; // Import BrowserQRCodeReader and IScannerControls
 
 interface NDEFRecord {
   recordType: string;
@@ -49,7 +50,8 @@ interface ScannerProps {
 }
 
 export function Scanner({ profileId, onScanComplete, onScanResult }: ScannerProps) {
-  const [isScanning, setIsScanning] = useState(false)
+  const [isScanning, setIsScanning] = useState(false) // For NFC scanning
+  const [isCameraScanning, setIsCameraScanning] = useState(false); // For camera scanning
   const [serialCode, setSerialCode] = useState("")
   const [section, setSection] = useState("")
   const [row, setRow] = useState<number>(1)
@@ -59,12 +61,28 @@ export function Scanner({ profileId, onScanComplete, onScanResult }: ScannerProp
   const [lastScanResult, setLastScanResult] = useState<string | null>(null)
   const { toast } = useToast()
 
+  const videoRef = useRef<HTMLVideoElement>(null); // Ref for the video element
+  const codeReader = useRef<BrowserQRCodeReader | null>(null);
+  const scannerControls = useRef<IScannerControls | null>(null);
+
   useEffect(() => {
     // Check for NFC support
     if ("NDEFReader" in window) {
       setNfcSupported(true)
     }
-  }, [])
+    // Cleanup effect for scanner
+    return () => {
+      if (scannerControls.current) {
+        scannerControls.current.stop();
+        scannerControls.current = null;
+      }
+      // Ensure codeReader.current is not null before attempting to use it
+      if (codeReader.current) {
+        // No reset method on BrowserQRCodeReader instance, just clear the ref
+        codeReader.current = null;
+      }
+    };
+  }, []);
 
   const startNFCScan = async () => {
     if (!nfcSupported) {
@@ -82,15 +100,35 @@ export function Scanner({ profileId, onScanComplete, onScanResult }: ScannerProp
 
       await ndef.scan()
 
+      const mappingsResponse = await fetch(`/api/nfc-mappings?profileId=${profileId}`)
+      const mappings = await mappingsResponse.json()
+
       ndef.addEventListener("reading", ({ message }: NDEFReadingEvent) => {
-        const textRecord = message.records.find((record: NDEFRecord) => record.recordType === "text")
-        if (textRecord) {
-          const decoder = new TextDecoder()
-          const text = decoder.decode(textRecord.data as ArrayBuffer)
-          setSerialCode(text)
-          setLastScanResult(`NFC: ${text}`)
-          setIsScanning(false)
+        for (const mapping of mappings) {
+          const matchingRecord = message.records.find(record => record.recordType === mapping.record_type);
+          if (matchingRecord) {
+            try {
+              // This is a simplified example. A robust solution would use a proper
+              // JSONPath library or a more sophisticated path parser.
+              const data = JSON.parse(new TextDecoder().decode(matchingRecord.data as ArrayBuffer));
+              const serial = data[mapping.field_path];
+              if (serial) {
+                setSerialCode(serial);
+                setLastScanResult(`NFC: ${serial}`);
+                setIsScanning(false);
+                return; // Stop processing further mappings
+              }
+            } catch {
+              // Fallback for non-JSON data
+              const text = new TextDecoder().decode(matchingRecord.data as ArrayBuffer);
+              setSerialCode(text);
+              setLastScanResult(`NFC: ${text}`);
+              setIsScanning(false);
+              return;
+            }
+          }
         }
+        setLastScanResult("NFC: No matching mapping found.");
       })
 
       toast({
@@ -106,6 +144,70 @@ export function Scanner({ profileId, onScanComplete, onScanResult }: ScannerProp
       })
     }
   }
+
+  const startCameraScan = async () => {
+    if (isCameraScanning) return; // Prevent multiple scans
+
+    try {
+      setIsCameraScanning(true);
+      codeReader.current = new BrowserQRCodeReader();
+      const videoInputDevices = await BrowserQRCodeReader.listVideoInputDevices(); // Corrected usage
+
+      if (videoInputDevices.length === 0) {
+        throw new Error("No video input devices found.");
+      }
+
+      // Select the first available device, or a specific one if needed
+      const selectedDeviceId = videoInputDevices[0].deviceId;
+
+      toast({
+        title: "Camera Scanning Active",
+        description: "Scanning for barcodes...",
+      });
+
+      scannerControls.current = await codeReader.current.decodeFromVideoDevice( // Corrected usage
+        selectedDeviceId,
+        videoRef.current!, // Assert non-null as it's conditionally rendered
+        (result, error) => {
+          if (result) {
+            setSerialCode(result.getText());
+            stopCameraScan(); // Stop scanning after a successful scan
+            toast({
+              title: "Barcode Scanned",
+              description: `Scanned: ${result.getText()}`,
+            });
+          }
+          if (error && error.name !== "NotFoundException") { // Ignore NotFoundException as it's common before a scan
+            console.error("Barcode scan error:", error);
+            // Optionally, show a toast for other errors
+          }
+        }
+      );
+    } catch (error) {
+      console.error("Failed to start camera scan:", error);
+      toast({
+        title: "Camera Scan Error",
+        description: error instanceof Error ? error.message : "Failed to start camera scanning",
+        variant: "destructive",
+      });
+      setIsCameraScanning(false);
+    }
+  };
+
+  const stopCameraScan = () => {
+    if (scannerControls.current) {
+      scannerControls.current.stop();
+      scannerControls.current = null;
+    }
+    if (codeReader.current) {
+      codeReader.current = null; // No reset method on BrowserQRCodeReader instance
+    }
+    setIsCameraScanning(false);
+    toast({
+      title: "Camera Scan Stopped",
+      description: "Barcode scanning has been stopped.",
+    });
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -202,14 +304,31 @@ export function Scanner({ profileId, onScanComplete, onScanResult }: ScannerProp
                   required
                 />
               </div>
-              {nfcSupported && (
-                <div className="flex items-end">
-                  <Button type="button" variant="outline" size="icon" onClick={startNFCScan} disabled={isScanning}>
+              <div className="flex items-end gap-2"> {/* Added gap-2 here */}
+                {nfcSupported && (
+                  <Button type="button" variant="outline" size="icon" onClick={startNFCScan} disabled={isScanning || isCameraScanning}>
                     <Smartphone className="h-4 w-4" />
                   </Button>
-                </div>
-              )}
+                )}
+                {isCameraScanning ? (
+                  <Button type="button" variant="destructive" size="icon" onClick={stopCameraScan}>
+                    <Camera className="h-4 w-4" />
+                  </Button>
+                ) : (
+                  <Button type="button" variant="outline" size="icon" onClick={startCameraScan} disabled={isScanning}>
+                    <Camera className="h-4 w-4" />
+                  </Button>
+                )}
+              </div>
             </div>
+
+            {isCameraScanning && (
+              <div className="relative w-full h-64 border rounded-md overflow-hidden">
+                <video ref={videoRef} className="absolute inset-0 w-full h-full object-cover"></video>
+                {/* Bounding box placeholder - styling would be applied via CSS */}
+                <div className="absolute inset-0 border-4 border-green-500 pointer-events-none"></div>
+              </div>
+            )}
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div>

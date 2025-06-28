@@ -78,8 +78,7 @@ export function DataExport({ profileId }: DataExportProps) {
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button
-              variant="outline" 
-              className="bg-white-500 hover:bg-gray-100 text-black-500" 
+              variant="default" className="text-white bg-black" 
               disabled={!profileId || isLoading}
             >
               Download
