@@ -40,12 +40,15 @@ declare global {
   }
 }
 
+import type { ScanLogEntry } from "./scan-log"; // Import the ScanLogEntry interface
+
 interface ScannerProps {
   profileId: number
   onScanComplete: () => void
+  onScanResult: (entry: ScanLogEntry) => void; // New prop for logging results
 }
 
-export function Scanner({ profileId, onScanComplete }: ScannerProps) {
+export function Scanner({ profileId, onScanComplete, onScanResult }: ScannerProps) {
   const [isScanning, setIsScanning] = useState(false)
   const [serialCode, setSerialCode] = useState("")
   const [section, setSection] = useState("")
@@ -135,14 +138,24 @@ export function Scanner({ profileId, onScanComplete }: ScannerProps) {
       // Auto-increment column for next scan
       setColumn((prev) => prev + 1)
       setSerialCode("")
-      setLastScanResult(`Success: ${serialCode} at ${section}-${row}-${column}`)
       onScanComplete()
+      onScanResult({
+        type: "success",
+        message: `Panel ${serialCode} recorded at ${section}-${row}-${column}`,
+        timestamp: new Date(),
+      });
     } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : "Failed to record scan";
       toast({
         title: "Scan Failed",
-        description: error instanceof Error ? error.message : "Failed to record scan",
+        description: errorMessage,
         variant: "destructive",
-      })
+      });
+      onScanResult({
+        type: "error",
+        message: `${errorMessage} (Serial: ${serialCode})`, // Include serial code in error message
+        timestamp: new Date(),
+      });
     } finally {
       setIsSubmitting(false)
     }

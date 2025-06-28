@@ -40,7 +40,7 @@ export function SectionGrid({ panels }: SectionGridProps) {
   return (
     <div className="space-y-6">
       <h3 className="text-lg font-semibold">Section Layout</h3>
-      <div className="grid gap-6">
+      <div className="grid gap-4">
         {sections.map((sectionName) => {
           const sectionPanels = panelsBySection[sectionName]
           const scannedPanels = sectionPanels.filter((p) => p.scanned_at)

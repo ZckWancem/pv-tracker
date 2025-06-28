@@ -7,6 +7,7 @@ import { ProfileSelector } from "@/components/profile-selector"
 import { FileUpload } from "@/components/file-upload"
 import { DataExport } from "@/components/data-export"
 import { Scanner } from "@/components/scanner"
+import { ScanLog, ScanLogEntry } from "@/components/scan-log" // Import ScanLog and ScanLogEntry
 import { DashboardStats } from "@/components/dashboard-stats"
 import { SectionGrid } from "@/components/section-grid"
 import { PanelsTable } from "@/components/panels-table"
@@ -19,6 +20,7 @@ export default function HomePage() {
   const [selectedProfileId, setSelectedProfileId] = useState<number | null>(null)
   const [panels, setPanels] = useState<Panel[]>([])
   const [isLoading, setIsLoading] = useState(true)
+  const [scanLogs, setScanLogs] = useState<ScanLogEntry[]>([]); // State for scan logs
   const { toast } = useToast()
 
   const loadProfiles = useCallback(async () => {
@@ -76,6 +78,10 @@ export default function HomePage() {
   const handleDataUpdate = () => {
     loadPanels()
   }
+
+  const handleScanResult = useCallback((entry: ScanLogEntry) => {
+    setScanLogs((prevLogs) => [...prevLogs, entry]);
+  }, []);
 
   const totalPanels = panels.length
   const scannedPanels = panels.filter((p) => p.scanned_at).length
@@ -145,16 +151,17 @@ export default function HomePage() {
             <TabsContent value="dashboard" className="space-y-6">
               <DashboardStats totalPanels={totalPanels} scannedPanels={scannedPanels} sections={sections} />
               <SectionGrid panels={panels} />
-              <PanelsTable panels={panels} onPanelUpdated={handleDataUpdate} />
             </TabsContent>
 
             <TabsContent value="upload" className="space-y-4">
               <FileUpload profileId={selectedProfileId} onUploadComplete={handleDataUpdate} />
               <DataExport profileId={selectedProfileId} />
+              <PanelsTable panels={panels} onPanelUpdated={handleDataUpdate} />
             </TabsContent>
 
-            <TabsContent value="scan">
-              <Scanner profileId={selectedProfileId} onScanComplete={handleDataUpdate} />
+            <TabsContent value="scan" className="space-y-4">
+              <Scanner profileId={selectedProfileId} onScanComplete={handleDataUpdate} onScanResult={handleScanResult} />
+              <ScanLog logs={scanLogs} />
             </TabsContent>
 
             <TabsContent value="settings">
