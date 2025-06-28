@@ -1,6 +1,7 @@
 import { type NextRequest, NextResponse } from "next/server"
 import { sql } from "@/lib/db"
 import { profileSchema } from "@/lib/validations"
+import { revalidatePath } from "next/cache"
 
 export async function GET() {
   try {
@@ -26,6 +27,8 @@ export async function POST(request: NextRequest) {
       VALUES (${validatedData.name}, ${validatedData.description || null})
       RETURNING *
     `
+
+    revalidatePath("/api/profiles")
 
     return NextResponse.json(profile)
   } catch (error) {

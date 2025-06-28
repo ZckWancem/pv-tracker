@@ -58,23 +58,23 @@ export function FileUpload({ profileId, onUploadComplete }: FileUploadProps) {
 
       if (!response.ok) {
         const errorData = await response.json()
-        throw new Error(errorData.error || "Upload failed")
+        throw new Error(errorData.error || "Import failed")
       }
 
       const result = await response.json()
       setUploadProgress(100)
 
       toast({
-        title: "Upload Successful",
-        description: `${result.count} panels uploaded successfully`,
+        title: "Import Successful",
+        description: `${result.count} panels imported successfully`,
       })
 
       onUploadComplete()
     } catch (error) {
-      setError(error instanceof Error ? error.message : "Upload failed")
+      setError(error instanceof Error ? error.message : "Import failed")
       toast({
-        title: "Upload Failed",
-        description: error instanceof Error ? error.message : "Upload failed",
+        title: "Import Failed",
+        description: error instanceof Error ? error.message : "Import failed",
         variant: "destructive",
       })
     } finally {
@@ -90,7 +90,7 @@ export function FileUpload({ profileId, onUploadComplete }: FileUploadProps) {
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <Upload className="h-5 w-5" />
-          Upload Packing List
+          Import Data
         </CardTitle>
         <CardDescription>Upload a CSV or Excel file containing pallet numbers and serial codes</CardDescription>
       </CardHeader>
@@ -140,8 +140,8 @@ export function FileUpload({ profileId, onUploadComplete }: FileUploadProps) {
         <div className="text-sm text-gray-600 dark:text-gray-400">
           <p className="font-medium mb-2">Expected file format:</p>
           <ul className="list-disc list-inside space-y-1">
-            <li>Column 1: pallet_no (or &quot;Pallet No&quot;)</li>
-            <li>Column 2: serial_code (or &quot;Serial Code&quot;)</li>
+            <li>Column 1: Pallet No</li>
+            <li>Column 2: Serial Code</li>
           </ul>
         </div>
       </CardContent>

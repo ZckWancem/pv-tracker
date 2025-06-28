@@ -31,7 +31,7 @@ export function SectionGrid({ panels }: SectionGridProps) {
       <Card>
         <CardHeader>
           <CardTitle>Section Layout</CardTitle>
-          <CardDescription>No sections with installed panels yet</CardDescription>
+          <CardDescription>No sections with scanned panels yet</CardDescription>
         </CardHeader>
       </Card>
     )
@@ -65,7 +65,7 @@ export function SectionGrid({ panels }: SectionGridProps) {
                 <div className="flex items-center justify-between">
                   <CardTitle>Section {sectionName}</CardTitle>
                   <Badge variant="outline">
-                    {scannedPanels.length}/{sectionPanels.length} installed
+                    {scannedPanels.length}/{sectionPanels.length} scanned
                   </Badge>
                 </div>
                 <CardDescription>
@@ -104,7 +104,7 @@ export function SectionGrid({ panels }: SectionGridProps) {
                                   </div>
                                   <div>Pallet: {panel.pallet_no}</div>
                                   {panel.scanned_at ? (
-                                    <div className="text-green-600">✓ Installed</div>
+                                    <div className="text-green-600">✓ Scanned</div>
                                   ) : (
                                     <div className="text-yellow-600">⏳ Pending</div>
                                   )}
@@ -131,7 +131,7 @@ export function SectionGrid({ panels }: SectionGridProps) {
                 <div className="flex gap-4 mt-4 text-sm">
                   <div className="flex items-center gap-2">
                     <div className="w-4 h-4 bg-green-500 rounded"></div>
-                    <span>Installed</span>
+                    <span>Scanned</span>
                   </div>
                   <div className="flex items-center gap-2">
                     <div className="w-4 h-4 bg-yellow-500 rounded"></div>

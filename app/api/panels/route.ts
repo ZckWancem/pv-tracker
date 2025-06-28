@@ -6,14 +6,20 @@ export const dynamic = 'force-dynamic' // force dynamic rendering
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url)
-    const profileId = searchParams.get("profileId")
+    const profileIdParam = searchParams.get("profileId")
 
-    if (!profileId) {
+    if (!profileIdParam) {
       return NextResponse.json({ error: "Profile ID is required" }, { status: 400 })
     }
 
+    const profileId = Number.parseInt(profileIdParam)
+
+    if (Number.isNaN(profileId)) {
+      return NextResponse.json({ error: "Invalid Profile ID" }, { status: 400 })
+    }
+
     const panels = await sql`
-      SELECT * FROM panels 
+      SELECT * FROM panels
       WHERE profile_id = ${profileId}
       ORDER BY created_at DESC
     `

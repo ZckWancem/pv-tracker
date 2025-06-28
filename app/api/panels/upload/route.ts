@@ -1,6 +1,7 @@
 import { type NextRequest, NextResponse } from "next/server"
 import { sql } from "@/lib/db"
 import { panelUploadSchema } from "@/lib/validations"
+import { revalidatePath } from "next/cache"
 
 export async function POST(request: NextRequest) {
   try {
@@ -14,26 +15,29 @@ export async function POST(request: NextRequest) {
     // Validate each panel
     const validatedPanels = panels.map((panel) => panelUploadSchema.parse(panel))
 
+    // Fetch existing serial codes for the given profile to prevent duplicates
+    const existingPanels = await sql`
+      SELECT serial_code FROM panels WHERE profile_id = ${profileId}
+    `
+    const existingSerialCodes = new Set(existingPanels.map((p) => p.serial_code))
+
+    const panelsToInsert = validatedPanels.filter(
+      (panel) => !existingSerialCodes.has(panel.serial_code)
+    )
+
     // Insert panels in batch
     const insertedPanels = []
-    for (const panel of validatedPanels) {
-      try {
-        const [insertedPanel] = await sql`
-          INSERT INTO panels (profile_id, pallet_no, serial_code)
-          VALUES (${profileId}, ${panel.pallet_no}, ${panel.serial_code})
-          RETURNING *
-        `
-        insertedPanels.push(insertedPanel)
-      } catch (error: unknown) {
-        // Skip duplicates but continue with others
-        if (error instanceof Error && 'code' in error && error.code === "23505") {
-          // Unique constraint violation, do nothing (skip duplicate)
-        } else {
-          // Not a unique constraint violation or unexpected error object, re-throw
-          throw error
-        }
-      }
+    for (const panel of panelsToInsert) { // Iterate over filtered panels
+      const [insertedPanel] = await sql`
+        INSERT INTO panels (profile_id, pallet_no, serial_code)
+        VALUES (${profileId}, ${panel.pallet_no}, ${panel.serial_code})
+        RETURNING *
+      `
+      insertedPanels.push(insertedPanel)
     }
+    // Remove the catch block related to unique constraint as duplicates are now handled before insertion
+
+    revalidatePath("/api/panels") // Revalidate the panels data path
 
     return NextResponse.json({
       message: "Panels uploaded successfully",

@@ -1,6 +1,7 @@
 import { type NextRequest, NextResponse } from "next/server"
 import { sql } from "@/lib/db"
 import { scanSchema } from "@/lib/validations"
+import { revalidatePath } from "next/cache"
 
 export async function POST(request: NextRequest) {
   try {
@@ -51,6 +52,8 @@ export async function POST(request: NextRequest) {
       WHERE id = ${existingPanel.id}
       RETURNING *
     `
+
+    revalidatePath("/api/panels")
 
     return NextResponse.json(updatedPanel)
   } catch (error) {

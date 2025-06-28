@@ -28,6 +28,7 @@ interface PanelsTableProps {
 export function PanelsTable({ panels, onPanelUpdated }: PanelsTableProps) {
   const [searchTerm, setSearchTerm] = useState("")
   const [editingPanel, setEditingPanel] = useState<Panel | null>(null)
+  const [panelToDelete, setPanelToDelete] = useState<Panel | null>(null)
   const [isLoading, setIsLoading] = useState(false)
   const { toast } = useToast()
 
@@ -75,11 +76,15 @@ export function PanelsTable({ panels, onPanelUpdated }: PanelsTableProps) {
     }
   }
 
-  const handleDeletePanel = async (panelId: number) => {
-    if (!confirm("Are you sure you want to delete this panel?")) return
+  const handleDeletePanel = async (panel: Panel) => {
+    setPanelToDelete(panel)
+  }
+
+  const confirmDeletePanel = async () => {
+    if (!panelToDelete) return
 
     try {
-      const response = await fetch(`/api/panels/${panelId}`, {
+      const response = await fetch(`/api/panels/${panelToDelete.id}`, {
         method: "DELETE",
       })
 
@@ -92,6 +97,7 @@ export function PanelsTable({ panels, onPanelUpdated }: PanelsTableProps) {
         description: "Panel deleted successfully",
       })
 
+      setPanelToDelete(null)
       onPanelUpdated()
     } catch {
       toast({
@@ -101,6 +107,7 @@ export function PanelsTable({ panels, onPanelUpdated }: PanelsTableProps) {
       })
     }
   }
+
 
   return (
     <Card>
@@ -123,12 +130,12 @@ export function PanelsTable({ panels, onPanelUpdated }: PanelsTableProps) {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Serial Code</TableHead>
-                <TableHead>Pallet No</TableHead>
-                <TableHead>Location</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead>Scanned At</TableHead>
-                <TableHead className="w-[100px]">Actions</TableHead>
+                <TableHead className="text-left bg-gray-100 text-slate-500">Serial Code</TableHead>
+                <TableHead className="text-left bg-gray-100 text-slate-500">Pallet No</TableHead>
+                <TableHead className="text-left bg-gray-100 text-slate-500">Location</TableHead>
+                <TableHead className="text-left bg-gray-100 text-slate-500">Status</TableHead>
+                <TableHead className="text-left bg-gray-100 text-slate-500">Scanned At</TableHead>
+                <TableHead className="w-[100px] bg-gray-100 text-slate-500">Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -143,73 +150,91 @@ export function PanelsTable({ panels, onPanelUpdated }: PanelsTableProps) {
                   </TableCell>
                   <TableCell>
                     <Badge variant={panel.scanned_at ? "default" : "secondary"}>
-                      {panel.scanned_at ? "Installed" : "Pending"}
+                      {panel.scanned_at ? "Scanned" : "Pending"}
                     </Badge>
                   </TableCell>
                   <TableCell>{panel.scanned_at ? new Date(panel.scanned_at).toLocaleDateString() : "-"}</TableCell>
                   <TableCell>
-                    <div className="flex gap-1">
+                    <div className="flex gap-1 justify-end">
+                      {panel.scanned_at && (
+                        <Dialog>
+                          <DialogTrigger asChild>
+                            <Button variant="ghost" size="icon" onClick={() => setEditingPanel(panel)}>
+                              <Edit className="h-4 w-4 text-zinc-400" />
+                            </Button>
+                          </DialogTrigger>
+                          <DialogContent>
+                            <DialogHeader>
+                              <DialogTitle>Edit Panel</DialogTitle>
+                              <DialogDescription>Update panel location information</DialogDescription>
+                            </DialogHeader>
+                            <form action={handleUpdatePanel}>
+                              <div className="grid gap-4 py-4">
+                                <div className="grid gap-2">
+                                  <Label>Serial Code</Label>
+                                  <Input value={editingPanel?.serial_code || ""} disabled />
+                                </div>
+                                <div className="grid gap-2">
+                                  <Label htmlFor="section">Section</Label>
+                                  <Input
+                                    id="section"
+                                    name="section"
+                                    defaultValue={editingPanel?.section || ""}
+                                    placeholder="e.g., A, B, North"
+                                  />
+                                </div>
+                                <div className="grid grid-cols-2 gap-4">
+                                  <div className="grid gap-2">
+                                    <Label htmlFor="row">Row</Label>
+                                    <Input
+                                      id="row"
+                                      name="row"
+                                      type="number"
+                                      defaultValue={editingPanel?.row_number || ""}
+                                      min="1"
+                                    />
+                                  </div>
+                                  <div className="grid gap-2">
+                                    <Label htmlFor="column">Column</Label>
+                                    <Input
+                                      id="column"
+                                      name="column"
+                                      type="number"
+                                      defaultValue={editingPanel?.column_number || ""}
+                                      min="1"
+                                    />
+                                  </div>
+                                </div>
+                              </div>
+                              <DialogFooter>
+                                <Button type="submit" disabled={isLoading}>
+                                  {isLoading ? "Updating..." : "Update Panel"}
+                                </Button>
+                              </DialogFooter>
+                            </form>
+                          </DialogContent>
+                        </Dialog>
+                      )}
+
                       <Dialog>
                         <DialogTrigger asChild>
-                          <Button variant="ghost" size="icon" onClick={() => setEditingPanel(panel)}>
-                            <Edit className="h-4 w-4" />
+                          <Button variant="ghost" size="icon" onClick={() => handleDeletePanel(panel)}>
+                            <Trash2 className="h-4 w-4 text-red-400" />
                           </Button>
                         </DialogTrigger>
                         <DialogContent>
                           <DialogHeader>
-                            <DialogTitle>Edit Panel</DialogTitle>
-                            <DialogDescription>Update panel location information</DialogDescription>
+                            <DialogTitle>Delete Panel</DialogTitle>
+                            <DialogDescription>
+                              Are you sure you want to delete panel with Serial Code: {panelToDelete?.serial_code}?
+                            </DialogDescription>
                           </DialogHeader>
-                          <form action={handleUpdatePanel}>
-                            <div className="grid gap-4 py-4">
-                              <div className="grid gap-2">
-                                <Label>Serial Code</Label>
-                                <Input value={editingPanel?.serial_code || ""} disabled />
-                              </div>
-                              <div className="grid gap-2">
-                                <Label htmlFor="section">Section</Label>
-                                <Input
-                                  id="section"
-                                  name="section"
-                                  defaultValue={editingPanel?.section || ""}
-                                  placeholder="e.g., A, B, North"
-                                />
-                              </div>
-                              <div className="grid grid-cols-2 gap-4">
-                                <div className="grid gap-2">
-                                  <Label htmlFor="row">Row</Label>
-                                  <Input
-                                    id="row"
-                                    name="row"
-                                    type="number"
-                                    defaultValue={editingPanel?.row_number || ""}
-                                    min="1"
-                                  />
-                                </div>
-                                <div className="grid gap-2">
-                                  <Label htmlFor="column">Column</Label>
-                                  <Input
-                                    id="column"
-                                    name="column"
-                                    type="number"
-                                    defaultValue={editingPanel?.column_number || ""}
-                                    min="1"
-                                  />
-                                </div>
-                              </div>
-                            </div>
-                            <DialogFooter>
-                              <Button type="submit" disabled={isLoading}>
-                                {isLoading ? "Updating..." : "Update Panel"}
-                              </Button>
-                            </DialogFooter>
-                          </form>
+                          <DialogFooter>
+                            <Button variant="outline" onClick={() => setPanelToDelete(null)}>Cancel</Button>
+                            <Button variant="destructive" onClick={confirmDeletePanel}>Delete</Button>
+                          </DialogFooter>
                         </DialogContent>
                       </Dialog>
-
-                      <Button variant="ghost" size="icon" onClick={() => handleDeletePanel(panel.id)}>
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
                     </div>
                   </TableCell>
                 </TableRow>

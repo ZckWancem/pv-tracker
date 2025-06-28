@@ -1,5 +1,6 @@
 import { type NextRequest, NextResponse } from "next/server"
 import { sql } from "@/lib/db"
+import { revalidatePath } from "next/cache"
 
 export async function PUT(request: NextRequest, { params }: { params: { id: string } }) {
   try {
@@ -21,6 +22,8 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
       return NextResponse.json({ error: "Panel not found" }, { status: 404 })
     }
 
+    revalidatePath("/api/panels")
+
     return NextResponse.json(updatedPanel)
   } catch (error) {
     console.error("Failed to update panel:", error)
@@ -39,6 +42,8 @@ export async function DELETE(request: NextRequest, { params }: { params: { id: s
     if (!deletedPanel) {
       return NextResponse.json({ error: "Panel not found" }, { status: 404 })
     }
+
+    revalidatePath("/api/panels")
 
     return NextResponse.json({ message: "Panel deleted successfully" })
   } catch (error) {

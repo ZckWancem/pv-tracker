@@ -34,7 +34,7 @@ export function DashboardStats({ totalPanels, scannedPanels, sections }: Dashboa
         </CardHeader>
         <CardContent>
           <div className="text-2xl font-bold">{scannedPanels}</div>
-          <p className="text-xs text-muted-foreground">Panels installed</p>
+          <p className="text-xs text-muted-foreground">Panels scanned</p>
         </CardContent>
       </Card>
 
@@ -45,7 +45,7 @@ export function DashboardStats({ totalPanels, scannedPanels, sections }: Dashboa
         </CardHeader>
         <CardContent>
           <div className="text-2xl font-bold">{remainingPanels}</div>
-          <p className="text-xs text-muted-foreground">Panels to install</p>
+          <p className="text-xs text-muted-foreground">Panels to scan</p>
         </CardContent>
       </Card>
 
@@ -62,13 +62,13 @@ export function DashboardStats({ totalPanels, scannedPanels, sections }: Dashboa
 
       <Card className="md:col-span-2 lg:col-span-4">
         <CardHeader>
-          <CardTitle>Installation Progress</CardTitle>
+          <CardTitle>Scanning Progress</CardTitle>
           <CardDescription>{completionPercentage.toFixed(1)}% complete</CardDescription>
         </CardHeader>
         <CardContent>
           <Progress value={completionPercentage} className="w-full" />
           <div className="flex justify-between text-sm text-muted-foreground mt-2">
-            <span>{scannedPanels} installed</span>
+            <span>{scannedPanels} scanned</span>
             <span>{remainingPanels} remaining</span>
           </div>
         </CardContent>

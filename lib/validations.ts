@@ -11,7 +11,7 @@ export const panelUploadSchema = z.object({
 })
 
 export const scanSchema = z.object({
-  profileId: z.string().min(1, "Profile ID is required"),
+  profileId: z.number().min(1, "Profile ID is required"),
   serial_code: z.string().min(1, "Serial code is required"),
   section: z.string().min(1, "Section is required"),
   row: z.number().min(1, "Row must be at least 1"),

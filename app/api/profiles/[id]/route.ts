@@ -1,6 +1,7 @@
 import { type NextRequest, NextResponse } from "next/server"
 import { sql } from "@/lib/db"
 import { profileSchema } from "@/lib/validations"
+import { revalidatePath } from "next/cache"
 
 export async function GET(
   request: NextRequest,
@@ -49,6 +50,8 @@ export async function PUT(
       return NextResponse.json({ error: "Profile not found" }, { status: 404 })
     }
 
+    revalidatePath("/api/profiles")
+
     return NextResponse.json(profile)
   } catch (error) {
     console.error("Failed to update profile:", error)
@@ -71,6 +74,8 @@ export async function DELETE(
     if (deletedProfile.length === 0) {
       return NextResponse.json({ error: "Profile not found" }, { status: 404 })
     }
+
+    revalidatePath("/api/profiles")
 
     return new NextResponse(null, { status: 204 })
   } catch (error) {

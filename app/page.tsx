@@ -2,8 +2,10 @@
 
 import { useState, useEffect, useCallback } from "react"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { ScanSearchIcon } from "lucide-react"
 import { ProfileSelector } from "@/components/profile-selector"
 import { FileUpload } from "@/components/file-upload"
+import { DataExport } from "@/components/data-export"
 import { Scanner } from "@/components/scanner"
 import { DashboardStats } from "@/components/dashboard-stats"
 import { SectionGrid } from "@/components/section-grid"
@@ -95,9 +97,12 @@ export default function HomePage() {
       <div className="container mx-auto px-4 py-8">
         <div className="mb-8">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-            <div>
-              <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Solar Panel Tracker</h1>
-              <p className="text-gray-600 dark:text-gray-400">Manage and track your solar panel installations</p>
+            <div className="flex items-center gap-2">
+              <ScanSearchIcon className="h-14 w-14 text-zinc-500 dark:text-white mr-2" />
+              <div className="flex flex-col">
+                <h1 className="text-4xl font-bold text-gray-900 dark:text-white">PV Tracker</h1>
+                <p className="text-gray-600 dark:text-gray-400 text-sm">v0.0.1a</p>
+              </div>
             </div>
             <ProfileSelector
               profiles={profiles}
@@ -111,10 +116,30 @@ export default function HomePage() {
         {selectedProfileId ? (
           <Tabs defaultValue="dashboard" className="space-y-6">
             <TabsList className="grid w-full grid-cols-4">
-              <TabsTrigger value="dashboard">Dashboard</TabsTrigger>
-              <TabsTrigger value="upload">Upload</TabsTrigger>
-              <TabsTrigger value="scan">Scan</TabsTrigger>
-              <TabsTrigger value="settings">Settings</TabsTrigger>
+              <TabsTrigger
+                value="dashboard"
+                className="data-[state=active]:bg-black data-[state=active]:text-white hover:bg-gray-300 hover:text-white dark:data-[state=active]:bg-black dark:data-[state=active]:text-white dark:hover:bg-gray-700 dark:hover:text-white"
+              >
+                Dashboard
+              </TabsTrigger>
+              <TabsTrigger
+                value="upload"
+                className="data-[state=active]:bg-black data-[state=active]:text-white hover:bg-gray-300 hover:text-white dark:data-[state=active]:bg-black dark:data-[state=active]:text-white dark:hover:bg-gray-700 dark:hover:text-white"
+              >
+                Data
+              </TabsTrigger>
+              <TabsTrigger
+                value="scan"
+                className="data-[state=active]:bg-black data-[state=active]:text-white hover:bg-gray-300 hover:text-white dark:data-[state=active]:bg-black dark:data-[state=active]:text-white dark:hover:bg-gray-700 dark:hover:text-white"
+              >
+                Scan
+              </TabsTrigger>
+              <TabsTrigger
+                value="settings"
+                className="data-[state=active]:bg-black data-[state=active]:text-white hover:bg-gray-300 hover:text-white dark:data-[state=active]:bg-black dark:data-[state=active]:text-white dark:hover:bg-gray-700 dark:hover:text-white"
+              >
+                Settings
+              </TabsTrigger>
             </TabsList>
 
             <TabsContent value="dashboard" className="space-y-6">
@@ -123,8 +148,9 @@ export default function HomePage() {
               <PanelsTable panels={panels} onPanelUpdated={handleDataUpdate} />
             </TabsContent>
 
-            <TabsContent value="upload">
+            <TabsContent value="upload" className="space-y-4">
               <FileUpload profileId={selectedProfileId} onUploadComplete={handleDataUpdate} />
+              <DataExport profileId={selectedProfileId} />
             </TabsContent>
 
             <TabsContent value="scan">
