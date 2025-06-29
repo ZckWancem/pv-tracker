@@ -6,6 +6,7 @@ export default function Document() {
       <Head>
         <link rel="manifest" href="/site.webmanifest" />
         <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+        <meta name="application-name" content="PV Tracker" />
         <meta name="theme-color" content="#fff" />
       </Head>
       <body>
