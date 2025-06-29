@@ -56,8 +56,6 @@ To run the application in development mode:
 npm run dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
-
 ### Building for Production
 
 To build the application for production:
