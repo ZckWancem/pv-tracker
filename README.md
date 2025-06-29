@@ -18,7 +18,7 @@ To set up the project locally, follow these steps:
 
 ### Prerequisites
 *   Node.js (version 18.17.0 or higher)
-*   npm or pnpm
+*   npm 
 *   A PostgreSQL database (e.g., NeonDB)
 
 ### Steps
