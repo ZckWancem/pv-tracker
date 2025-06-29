@@ -1,7 +1,7 @@
 # PV Tracker
 
 ## Description
-The PV (Photovoltaic) Tracker is a web application designed to manage and track solar panel installed positions. Built with Next.js, React, and a PostgreSQL database, the application aims to streamline the process of monitoring and maintaining solar panel projects.
+PV (Photovoltaic) Tracker is a web application designed to manage and track solar panel installed positions. Built with Next.js, React, and a PostgreSQL database, the application aims to streamline the process of monitoring and maintaining solar panel projects.
 
 ## Features
 *   **Profile Management:** Create, edit, and delete project profiles to organize.
