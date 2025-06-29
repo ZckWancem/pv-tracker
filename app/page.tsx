@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { ScanSearchIcon } from "lucide-react"
+import { PackageSearchIcon } from "lucide-react"
 import { ProfileSelector } from "@/components/profile-selector"
 import { FileUpload } from "@/components/file-upload"
 import { DataExport } from "@/components/data-export"
@@ -104,7 +104,7 @@ export default function HomePage() {
         <div className="mb-8">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div className="flex items-center gap-2">
-              <ScanSearchIcon className="h-14 w-14 text-stone-400 dark:text-white mr-2" />
+              <PackageSearchIcon className="h-14 w-14 text-black-500 dark:text-white mr-2" />
               <div className="flex flex-col">
                 <h1 className="text-4xl font-bold text-gray-900 dark:text-white">PV Tracker</h1>
                 <p className="text-gray-600 dark:text-gray-400 text-sm">v1.0.0-beta</p>
