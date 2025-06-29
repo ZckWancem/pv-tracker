@@ -87,8 +87,8 @@ export function SectionGrid({ panels }: SectionGridProps) {
                                 className={`w-8 h-8 border rounded text-xs flex items-center justify-center cursor-pointer ${
                                   panel
                                     ? panel.scanned_at
-                                      ? "bg-green-400 text-white border-green-500 hover:bg-green-400/80"
-                                      : "bg-yellow-400 text-white border-yellow-500 hover:bg-yellow-400/80"
+                                      ? "bg-green-400 text-white border-green-700 hover:bg-green-400/80"
+                                      : "bg-yellow-400 text-white border-yellow-700 hover:bg-yellow-400/80"
                                     : "bg-gray-200 border-gray-500 dark:bg-gray-700 dark:border-gray-600"
                                 }`}
                               >

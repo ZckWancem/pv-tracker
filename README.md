@@ -1,12 +1,12 @@
 # PV Tracker
 
 ## Description
-The PV (Photovoltaic) Tracker is a web application designed to manage and track solar panel installed locations. Built with Next.js, React, and a PostgreSQL database, the application aims to streamline the process of monitoring and maintaining solar panel projects.
+The PV (Photovoltaic) Tracker is a web application designed to manage and track solar panel installed positions. Built with Next.js, React, and a PostgreSQL database, the application aims to streamline the process of monitoring and maintaining solar panel projects.
 
 ## Features
 *   **Profile Management:** Create, edit, and delete project profiles to organize.
 *   **Panel Data Upload:** Upload solar panel data via CSV or Excel files.
-*   **Interactive Dashboard:** View key statistics and insights related to solar panel location.
+*   **Interactive Dashboard:** View key statistics and insights related to solar panel installed positions.
 *   **Panel Table View:** Browse and manage detailed information about individual solar panels.
 *   **NFC Tool Integration:** Support for NFC-enabled scanning of solar panels.
 *   **RESTful API:** Robust API endpoints for managing profiles and panel data.
@@ -31,8 +31,6 @@ To set up the project locally, follow these steps:
 2.  **Install dependencies:**
     ```bash
     npm install
-    # or
-    pnpm install
     ```
 
 3.  **Configure environment variables:**
@@ -40,13 +38,12 @@ To set up the project locally, follow these steps:
     ```
     DATABASE_URL="postgresql://user:password@host:port/database?sslmode=require"
     ```
-    Replace `user`, `password`, `host`, `port`, and `database` with your PostgreSQL database credentials.
+    Get your DATABASE_URL via [neon](https://console.neon.tech/).
 
 4.  **Set up the database schema:**
-    Run the SQL script to create the necessary tables in your PostgreSQL database. You can use a tool like `psql` or `pgAdmin`.
+    Run the SQL script to create the necessary tables in your PostgreSQL database.
     ```bash
-    # Example using psql
-    psql -h <your-db-host> -U <your-db-user> -d <your-db-name> -f ./scripts/001-initial-schema.sql
+    npm run migrate
     ```
 
 ## Usage
@@ -57,8 +54,6 @@ To run the application in development mode:
 
 ```bash
 npm run dev
-# or
-pnpm dev
 ```
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
@@ -69,8 +64,6 @@ To build the application for production:
 
 ```bash
 npm run build
-# or
-pnpm build
 ```
 
 ### Starting Production Server
@@ -79,8 +72,6 @@ To start the built application in production mode:
 
 ```bash
 npm start
-# or
-pnpm start
 ```
 
 ## Contributing

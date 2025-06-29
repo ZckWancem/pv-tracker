@@ -1,4 +1,5 @@
 import { type NextRequest, NextResponse } from "next/server"
+export const dynamic = 'force-dynamic'
 import { sql } from "@/lib/db"
 import Papa from "papaparse"
 import * as XLSX from "xlsx"

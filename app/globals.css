@@ -76,3 +76,16 @@
     @apply bg-background text-foreground;
   }
 }
+
+#interactive video,
+#interactive canvas.drawingBuffer {
+  position: absolute !important;
+  top: 0;
+  left: 0;
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover;
+  z-index: 10;
+  display: block;
+  pointer-events: none;
+}

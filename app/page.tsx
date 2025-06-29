@@ -107,7 +107,7 @@ export default function HomePage() {
               <ScanSearchIcon className="h-14 w-14 text-stone-400 dark:text-white mr-2" />
               <div className="flex flex-col">
                 <h1 className="text-4xl font-bold text-gray-900 dark:text-white">PV Tracker</h1>
-                <p className="text-gray-600 dark:text-gray-400 text-sm">v0.0.1a</p>
+                <p className="text-gray-600 dark:text-gray-400 text-sm">v1.0.0-beta</p>
               </div>
             </div>
             <ProfileSelector

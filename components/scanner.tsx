@@ -2,8 +2,8 @@
 
 import type React from "react"
 
-import { useState, useEffect, useRef } from "react" // Import useRef
-import { Scan, Smartphone, Plus, Minus, Camera } from "lucide-react" // Import Camera icon
+import { useState, useEffect, useRef } from "react"
+import { Scan, Smartphone, Plus, Minus, Camera } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
@@ -11,7 +11,7 @@ import { Label } from "@/components/ui/label"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Badge } from "@/components/ui/badge"
 import { useToast } from "@/hooks/use-toast"
-import { BrowserQRCodeReader, IScannerControls } from '@zxing/browser'; // Import BrowserQRCodeReader and IScannerControls
+import Quagga from '@ericblade/quagga2'; // Import Quagga
 
 interface NDEFRecord {
   recordType: string;
@@ -41,12 +41,12 @@ declare global {
   }
 }
 
-import type { ScanLogEntry } from "./scan-log"; // Import the ScanLogEntry interface
+import type { ScanLogEntry } from "./scan-log";
 
 interface ScannerProps {
   profileId: number
   onScanComplete: () => void
-  onScanResult: (entry: ScanLogEntry) => void; // New prop for logging results
+  onScanResult: (entry: ScanLogEntry) => void;
 }
 
 export function Scanner({ profileId, onScanComplete, onScanResult }: ScannerProps) {
@@ -61,28 +61,33 @@ export function Scanner({ profileId, onScanComplete, onScanResult }: ScannerProp
   const [lastScanResult, setLastScanResult] = useState<string | null>(null)
   const { toast } = useToast()
 
-  const videoRef = useRef<HTMLVideoElement>(null); // Ref for the video element
-  const codeReader = useRef<BrowserQRCodeReader | null>(null);
-  const scannerControls = useRef<IScannerControls | null>(null);
+  const videoRef = useRef<HTMLDivElement>(null); // Ref for Quagga's target element
+  const ndefReaderRef = useRef<NDEFReader | null>(null); // Ref for NDEFReader instance
+  const nfcReadingHandlerRef = useRef<((event: NDEFReadingEvent) => void) | null>(null);
+  const nfcErrorHandlerRef = useRef<(() => void) | null>(null);
 
   useEffect(() => {
     // Check for NFC support
     if ("NDEFReader" in window) {
       setNfcSupported(true)
     }
-    // Cleanup effect for scanner
+
     return () => {
-      if (scannerControls.current) {
-        scannerControls.current.stop();
-        scannerControls.current = null;
+      // Cleanup for NFC
+      if (ndefReaderRef.current && nfcReadingHandlerRef.current && nfcErrorHandlerRef.current) {
+        ndefReaderRef.current.removeEventListener("reading", nfcReadingHandlerRef.current as (event: NDEFReadingEvent) => void);
+        ndefReaderRef.current.removeEventListener("readingerror", nfcErrorHandlerRef.current as () => void);
+        ndefReaderRef.current = null;
+        nfcReadingHandlerRef.current = null;
+        nfcErrorHandlerRef.current = null;
       }
-      // Ensure codeReader.current is not null before attempting to use it
-      if (codeReader.current) {
-        // No reset method on BrowserQRCodeReader instance, just clear the ref
-        codeReader.current = null;
+      // Cleanup for Quagga2
+      if (isCameraScanning) {
+        Quagga.stop();
+        Quagga.offDetected();
       }
     };
-  }, []);
+  }, [isCameraScanning, isScanning]); // Depend on isCameraScanning and isScanning for cleanup
 
   const startNFCScan = async () => {
     if (!nfcSupported) {
@@ -93,96 +98,196 @@ export function Scanner({ profileId, onScanComplete, onScanResult }: ScannerProp
       })
       return
     }
-
+ 
     try {
       setIsScanning(true)
       const ndef = new (window as Window).NDEFReader!()
-
+      ndefReaderRef.current = ndef; // Store the NDEFReader instance
+ 
       await ndef.scan()
-
+ 
       const mappingsResponse = await fetch(`/api/nfc-mappings?profileId=${profileId}`)
       const mappings = await mappingsResponse.json()
-
-      ndef.addEventListener("reading", ({ message }: NDEFReadingEvent) => {
+ 
+      const readingHandler = ({ message }: NDEFReadingEvent) => {
         for (const mapping of mappings) {
           const matchingRecord = message.records.find(record => record.recordType === mapping.record_type);
           if (matchingRecord) {
             try {
-              // This is a simplified example. A robust solution would use a proper
-              // JSONPath library or a more sophisticated path parser.
               const data = JSON.parse(new TextDecoder().decode(matchingRecord.data as ArrayBuffer));
               const serial = data[mapping.field_path];
               if (serial) {
                 setSerialCode(serial);
                 setLastScanResult(`NFC: ${serial}`);
-                setIsScanning(false);
-                return; // Stop processing further mappings
+                stopNFCScan(); // Stop scanning after a successful read
+                return;
               }
             } catch {
-              // Fallback for non-JSON data
               const text = new TextDecoder().decode(matchingRecord.data as ArrayBuffer);
               setSerialCode(text);
               setLastScanResult(`NFC: ${text}`);
-              setIsScanning(false);
+              stopNFCScan(); // Stop scanning after a successful read
               return;
             }
           }
         }
         setLastScanResult("NFC: No matching mapping found.");
-      })
-
+        stopNFCScan(); // Stop scanning if no mapping is found
+      };
+ 
+      const errorHandler = () => {
+        setIsScanning(false)
+        toast({
+          title: "NFC Read Error",
+          description: "Failed to read NFC tag",
+          variant: "destructive",
+        })
+      };
+      
+      nfcReadingHandlerRef.current = readingHandler;
+      nfcErrorHandlerRef.current = errorHandler;
+ 
+      ndef.addEventListener("reading", readingHandler);
+      ndef.addEventListener("readingerror", errorHandler);
+ 
       toast({
         title: "NFC Scanning Active",
         description: "Tap an NFC tag to scan",
       })
-    } catch {
+    } catch (error) {
       setIsScanning(false)
       toast({
         title: "NFC Error",
-        description: "Failed to start NFC scanning",
+        description: error instanceof Error ? error.message : "Failed to start NFC scanning",
         variant: "destructive",
       })
     }
   }
-
+ 
+  const stopNFCScan = () => {
+    if (ndefReaderRef.current && nfcReadingHandlerRef.current && nfcErrorHandlerRef.current) {
+      ndefReaderRef.current.removeEventListener("reading", nfcReadingHandlerRef.current as (event: NDEFReadingEvent) => void);
+      ndefReaderRef.current.removeEventListener("readingerror", nfcErrorHandlerRef.current as () => void);
+      ndefReaderRef.current = null; // Clear the ref
+      nfcReadingHandlerRef.current = null;
+      nfcErrorHandlerRef.current = null;
+    }
+    setIsScanning(false)
+    toast({
+      title: "NFC Scanning Stopped",
+      description: "NFC scanning has been stopped.",
+    })
+  }
+ 
   const startCameraScan = async () => {
-    if (isCameraScanning) return; // Prevent multiple scans
-
+    if (isCameraScanning) return;
+ 
     try {
       setIsCameraScanning(true);
-      codeReader.current = new BrowserQRCodeReader();
-      const videoInputDevices = await BrowserQRCodeReader.listVideoInputDevices(); // Corrected usage
-
-      if (videoInputDevices.length === 0) {
-        throw new Error("No video input devices found.");
-      }
-
-      // Select the first available device, or a specific one if needed
-      const selectedDeviceId = videoInputDevices[0].deviceId;
-
-      toast({
-        title: "Camera Scanning Active",
-        description: "Scanning for barcodes...",
-      });
-
-      scannerControls.current = await codeReader.current.decodeFromVideoDevice( // Corrected usage
-        selectedDeviceId,
-        videoRef.current!, // Assert non-null as it's conditionally rendered
-        (result, error) => {
-          if (result) {
-            setSerialCode(result.getText());
-            stopCameraScan(); // Stop scanning after a successful scan
+      if (videoRef.current) {
+        Quagga.init({
+          inputStream: {
+            name: "Live",
+            type: "LiveStream",
+            target: videoRef.current,
+            constraints: {
+              width: { min: 1280 },
+              height: { min: 720 },
+              facingMode: "environment", // Prefer the back camera
+              aspectRatio: { min: 1, max: 2 }
+            }
+          },
+          numOfWorkers: navigator.hardwareConcurrency || 4,
+          decoder: {
+            readers: ["code_128_reader"],
+            multiple: false // Decode only one barcode at a time
+          },
+          locator: {
+            patchSize: "medium",
+            halfSample: true
+          },
+          locate: true
+        }, (err) => {
+          if (err) {
+            console.error("Quagga initialization error:", err);
             toast({
-              title: "Barcode Scanned",
-              description: `Scanned: ${result.getText()}`,
+              title: "Camera Scan Error",
+              description: `Failed to initialize camera: ${err.message || err}`,
+              variant: "destructive",
             });
+            setIsCameraScanning(false);
+            return;
           }
-          if (error && error.name !== "NotFoundException") { // Ignore NotFoundException as it's common before a scan
-            console.error("Barcode scan error:", error);
-            // Optionally, show a toast for other errors
+          Quagga.start();
+
+          toast({
+            title: "Camera Scanning Active",
+            description: "Point the camera at a barcode to scan",
+          });
+        
+          const syncCanvasSize = () => {
+            const canvas = Quagga.canvas?.dom?.overlay;
+            const container = videoRef.current;
+ 
+            if (canvas && container instanceof HTMLElement) {
+              const { offsetWidth, offsetHeight } = container;
+              canvas.width = offsetWidth;
+              canvas.height = offsetHeight;
+              canvas.style.width = `${offsetWidth}px`;
+              canvas.style.height = `${offsetHeight}px`;
+            }
+          };
+ 
+          window.addEventListener("resize", syncCanvasSize);
+ 
+          Quagga.onProcessed((result) => {
+          const ctx = Quagga.canvas?.ctx?.overlay;
+          const canvas = Quagga.canvas?.dom?.overlay;
+ 
+          if (!ctx || !canvas) return;
+ 
+          ctx.clearRect(0, 0, canvas.width, canvas.height);
+ 
+          const rawBox = result?.box as number[][];
+ 
+          if (
+            Array.isArray(rawBox) &&
+            rawBox.every(point => Array.isArray(point) && point.length === 2)
+          ) {
+            const box = rawBox.map(([x, y]) => ({ x, y }));
+ 
+            ctx.strokeStyle = "lime";
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            box.forEach((point, i) => {
+              const next = box[(i + 1) % box.length];
+              ctx.moveTo(point.x, point.y);
+              ctx.lineTo(next.x, next.y);
+            });
+            ctx.closePath();
+            ctx.stroke();
           }
-        }
-      );
+        });
+ 
+          Quagga.onDetected((result) => {
+            if (result.codeResult && result.codeResult.code !== null) {
+              setSerialCode(result.codeResult.code);
+              stopCameraScan();
+              toast({
+                title: "Barcode Scanned",
+                description: `Scanned: ${result.codeResult.code}`,
+              });
+            }
+          });
+        });
+      } else {
+        toast({
+          title: "Camera Scan Error",
+          description: "Video element not found. Cannot start camera scanning.",
+          variant: "destructive",
+        });
+        setIsCameraScanning(false);
+      }
     } catch (error) {
       console.error("Failed to start camera scan:", error);
       toast({
@@ -193,20 +298,17 @@ export function Scanner({ profileId, onScanComplete, onScanResult }: ScannerProp
       setIsCameraScanning(false);
     }
   };
-
+ 
   const stopCameraScan = () => {
-    if (scannerControls.current) {
-      scannerControls.current.stop();
-      scannerControls.current = null;
+    if (isCameraScanning) {
+      Quagga.stop();
+      Quagga.offDetected(); // Deregister the event listener
+      setIsCameraScanning(false);
+      toast({
+        title: "Camera Scan Stopped",
+        description: "Barcode scanning has been stopped.",
+      });
     }
-    if (codeReader.current) {
-      codeReader.current = null; // No reset method on BrowserQRCodeReader instance
-    }
-    setIsCameraScanning(false);
-    toast({
-      title: "Camera Scan Stopped",
-      description: "Barcode scanning has been stopped.",
-    });
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -237,7 +339,6 @@ export function Scanner({ profileId, onScanComplete, onScanResult }: ScannerProp
         description: `Panel ${serialCode} recorded at ${section}-${row}-${column}`,
       })
 
-      // Auto-increment column for next scan
       setColumn((prev) => prev + 1)
       setSerialCode("")
       onScanComplete()
@@ -255,7 +356,7 @@ export function Scanner({ profileId, onScanComplete, onScanResult }: ScannerProp
       });
       onScanResult({
         type: "error",
-        message: `${errorMessage} (Serial: ${serialCode})`, // Include serial code in error message
+        message: `${errorMessage} (Serial: ${serialCode})`,
         timestamp: new Date(),
       });
     } finally {
@@ -273,6 +374,16 @@ export function Scanner({ profileId, onScanComplete, onScanResult }: ScannerProp
       setColumn((prev) => prev - 1)
     }
     setSerialCode("")
+  }
+
+    const handleNextRow = () => {
+    setRow((prev) => prev + 1)
+  }
+
+  const handlePreviousRow = () => {
+    if (row > 1) {
+      setRow((prev) => prev - 1)
+    }
   }
 
   return (
@@ -302,13 +413,20 @@ export function Scanner({ profileId, onScanComplete, onScanResult }: ScannerProp
                   onChange={(e) => setSerialCode(e.target.value)}
                   placeholder="Scan or enter serial code"
                   required
+                  disabled={isCameraScanning}
                 />
               </div>
-              <div className="flex items-end gap-2"> {/* Added gap-2 here */}
+              <div className="flex items-end gap-2">
                 {nfcSupported && (
-                  <Button type="button" variant="outline" size="icon" onClick={startNFCScan} disabled={isScanning || isCameraScanning}>
-                    <Smartphone className="h-4 w-4" />
-                  </Button>
+                  isScanning ? (
+                    <Button type="button" variant="destructive" size="icon" onClick={stopNFCScan}>
+                      <Smartphone className="h-4 w-4" />
+                    </Button>
+                  ) : (
+                    <Button type="button" variant="outline" size="icon" onClick={startNFCScan} disabled={isCameraScanning}>
+                      <Smartphone className="h-4 w-4" />
+                    </Button>
+                  )
                 )}
                 {isCameraScanning ? (
                   <Button type="button" variant="destructive" size="icon" onClick={stopCameraScan}>
@@ -322,13 +440,11 @@ export function Scanner({ profileId, onScanComplete, onScanResult }: ScannerProp
               </div>
             </div>
 
-            {isCameraScanning && (
-              <div className="relative w-full h-64 border rounded-md overflow-hidden">
-                <video ref={videoRef} className="absolute inset-0 w-full h-full object-cover"></video>
-                {/* Bounding box placeholder - styling would be applied via CSS */}
-                <div className="absolute inset-0 border-4 border-green-500 pointer-events-none"></div>
-              </div>
-            )}
+            <div ref={videoRef} id="interactive" className={`viewport relative w-full h-64 border rounded-md overflow-hidden ${isCameraScanning ? '' : 'hidden'}`}>
+              {/* Quagga will inject video and canvas here */}
+              {/* Bounding box is drawn by Quagga */}
+              
+            </div>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div>
@@ -343,14 +459,23 @@ export function Scanner({ profileId, onScanComplete, onScanResult }: ScannerProp
               </div>
               <div>
                 <Label htmlFor="row">Row</Label>
+                <div className="flex gap-1">
+                  <Button type="button" variant="outline" size="icon" onClick={handlePreviousRow} disabled={row <= 1}>
+                    <Minus className="h-4 w-4" />
+                  </Button>
                 <Input
                   id="row"
                   type="number"
                   value={row}
                   onChange={(e) => setRow(Number.parseInt(e.target.value) || 1)}
                   min="1"
+                  className="text-center"
                   required
                 />
+                <Button type="button" variant="outline" size="icon" onClick={handleNextRow}>
+                    <Plus className="h-4 w-4" />
+                  </Button>
+                  </div>
               </div>
               <div>
                 <Label htmlFor="column">Column</Label>

@@ -18,7 +18,6 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-  AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import {
@@ -275,7 +274,7 @@ export function ProfileSelector({
               <AlertDialogHeader>
                 <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
                 <AlertDialogDescription>
-                  This action cannot be undone. This will permanently delete the profile "
+                  This action cannot be undone. This will permanently delete the profile &quot;
                   {selectedProfile.name}" and all associated data.
                 </AlertDialogDescription>
               </AlertDialogHeader>
