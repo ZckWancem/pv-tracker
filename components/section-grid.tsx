@@ -1,8 +1,10 @@
 "use client"
 
+import { useState } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
+import { PanelDetailDialog } from "@/components/panel-detail-dialog"
 import type { Panel } from "@/lib/db"
 
 interface SectionGridProps {
@@ -10,6 +12,10 @@ interface SectionGridProps {
 }
 
 export function SectionGrid({ panels }: SectionGridProps) {
+  const [selectedPanel, setSelectedPanel] = useState<Panel | null>(null)
+  const [isDialogOpen, setIsDialogOpen] = useState(false)
+  const [sectionNameForDialog, setSectionNameForDialog] = useState<string>("")
+
   // Group panels by section
   const panelsBySection = panels.reduce(
     (acc, panel) => {
@@ -25,6 +31,14 @@ export function SectionGrid({ panels }: SectionGridProps) {
   )
 
   const sections = Object.keys(panelsBySection).sort()
+
+  const handlePanelClick = (panel: Panel | null, sectionName: string) => {
+    if (panel) {
+      setSelectedPanel(panel)
+      setSectionNameForDialog(sectionName)
+      setIsDialogOpen(true)
+    }
+  }
 
   if (sections.length === 0) {
     return (
@@ -91,6 +105,7 @@ export function SectionGrid({ panels }: SectionGridProps) {
                                       : "bg-yellow-400 text-white border-yellow-700 hover:bg-yellow-400/80"
                                     : "bg-gray-200 border-gray-500 dark:bg-gray-700 dark:border-gray-600"
                                 }`}
+                                onClick={() => handlePanelClick(panel, sectionName)}
                               >
                                 {/* {colIndex + 1} */}
                               </div>
@@ -147,6 +162,13 @@ export function SectionGrid({ panels }: SectionGridProps) {
           )
         })}
       </div>
+
+      <PanelDetailDialog
+        panel={selectedPanel}
+        sectionName={sectionNameForDialog}
+        isOpen={isDialogOpen}
+        onOpenChange={setIsDialogOpen}
+      />
     </div>
   )
 }
