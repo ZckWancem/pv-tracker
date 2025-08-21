@@ -25,6 +25,12 @@ export function PanelDetailDialog({
 }: PanelDetailDialogProps) {
   if (!panel) return null
 
+  const getSectionLetter = (sectionNumber: string) => {
+    const num = parseInt(sectionNumber, 10)
+    if (isNaN(num) || num < 1) return sectionNumber
+    return String.fromCharCode(64 + num)
+  }
+
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[425px]">
@@ -34,19 +40,29 @@ export function PanelDetailDialog({
             Detailed information for panel {panel.serial_code}
           </DialogDescription>
         </DialogHeader>
-        <Card>
-          <CardHeader>
-            <CardTitle>{panel.serial_code}</CardTitle>
-          </CardHeader>
-          <CardContent className="grid gap-4">
-            <div>
-              <p><strong>Position:</strong> {sectionName}-{panel.row_number}-{panel.column_number}</p>
+        <div className="grid gap-4">
+          <Card>
+            <CardHeader>
+              <CardTitle>PV Module</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p><strong>Serial Code:</strong> {panel.serial_code}</p>
               <p><strong>Pallet:</strong> {panel.pallet_no}</p>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardHeader>
+              <CardTitle>Position</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p><strong>Section:</strong> {getSectionLetter(sectionName)}</p>
+              <p><strong>Row:</strong> {panel.row_number}</p>
+              <p><strong>Column:</strong> {panel.column_number}</p>
               <p><strong>Status:</strong> {panel.scanned_at ? "Scanned" : "Pending"}</p>
               {panel.scanned_at && <p><strong>Scanned At:</strong> {new Date(panel.scanned_at).toLocaleString()}</p>}
-            </div>
-          </CardContent>
-        </Card>
+            </CardContent>
+          </Card>
+        </div>
       </DialogContent>
     </Dialog>
   )

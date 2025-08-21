@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useEffect, useCallback } from "react"
+import { ScrollArea } from "@/components/ui/scroll-area"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { PackageSearchIcon } from "lucide-react"
 import { ProfileSelector } from "@/components/profile-selector"
@@ -9,6 +10,7 @@ import { DataExport } from "@/components/data-export"
 import { Scanner } from "@/components/scanner"
 import { ScanLog, ScanLogEntry } from "@/components/scan-log" // Import ScanLog and ScanLogEntry
 import { DashboardStats } from "@/components/dashboard-stats"
+import { LayoutView } from "@/components/layout-view"
 import { SectionGrid } from "@/components/section-grid"
 import { PanelsTable } from "@/components/panels-table"
 import { NFCTestTool } from "@/components/nfc-test-tool"
@@ -121,7 +123,7 @@ export default function HomePage() {
 
         {selectedProfileId ? (
           <Tabs defaultValue="dashboard" className="space-y-6">
-            <TabsList className="grid w-full grid-cols-4">
+            <TabsList className="grid w-full grid-cols-5">
               <TabsTrigger
                 value="dashboard"
                 className="data-[state=active]:bg-black data-[state=active]:text-white hover:bg-stone-300 hover:text-black dark:data-[state=active]:bg-black dark:data-[state=active]:text-white dark:hover:bg-gray-700 dark:hover:text-white"
@@ -133,6 +135,12 @@ export default function HomePage() {
                 className="data-[state=active]:bg-black data-[state=active]:text-white hover:bg-stone-300 hover:text-black dark:data-[state=active]:bg-black dark:data-[state=active]:text-white dark:hover:bg-gray-700 dark:hover:text-white"
               >
                 Data
+              </TabsTrigger>
+              <TabsTrigger
+                value="layout"
+                className="data-[state=active]:bg-black data-[state=active]:text-white hover:bg-stone-300 hover:text-black dark:data-[state=active]:bg-black dark:data-[state=active]:text-white dark:hover:bg-gray-700 dark:hover:text-white"
+              >
+                Layout View
               </TabsTrigger>
               <TabsTrigger
                 value="scan"
@@ -157,6 +165,10 @@ export default function HomePage() {
               <FileUpload profileId={selectedProfileId} onUploadComplete={handleDataUpdate} />
               <DataExport profileId={selectedProfileId} />
               <PanelsTable panels={panels} onPanelUpdated={handleDataUpdate} />
+            </TabsContent>
+
+            <TabsContent value="layout">
+              <LayoutView panels={panels} profiles={profiles} selectedProfileId={selectedProfileId} />
             </TabsContent>
 
             <TabsContent value="scan" className="space-y-4">
