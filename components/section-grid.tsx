@@ -30,7 +30,31 @@ export function SectionGrid({ panels }: SectionGridProps) {
     {} as Record<string, Panel[]>,
   )
 
-  const sections = Object.keys(panelsBySection).sort()
+  const naturalSort = (a: string, b: string) => {
+    const re = /(\d+)/g;
+    const aParts = a.split(re);
+    const bParts = b.split(re);
+    const len = Math.min(aParts.length, bParts.length);
+
+    for (let i = 0; i < len; i++) {
+      const aPart = aParts[i];
+      const bPart = bParts[i];
+      if (i % 2 === 1) { // It's a number
+        const aNum = parseInt(aPart, 10);
+        const bNum = parseInt(bPart, 10);
+        if (aNum !== bNum) {
+          return aNum - bNum;
+        }
+      } else {
+        if (aPart !== bPart) {
+          return aPart.localeCompare(bPart);
+        }
+      }
+    }
+    return a.length - b.length;
+  };
+
+  const sections = Object.keys(panelsBySection).sort(naturalSort)
 
   const handlePanelClick = (panel: Panel | null, sectionName: string) => {
     if (panel) {

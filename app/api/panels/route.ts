@@ -21,7 +21,11 @@ export async function GET(request: NextRequest) {
     const panels = await sql`
       SELECT * FROM panels
       WHERE profile_id = ${profileId}
-      ORDER BY created_at DESC
+      ORDER BY
+        substring(section from '^[^0-9]+'),
+        CAST(substring(section from '[0-9]+') AS INTEGER),
+        row_number,
+        column_number
     `
 
     return NextResponse.json(panels)
