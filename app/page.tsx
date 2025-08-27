@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback } from "react"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { PackageSearchIcon } from "lucide-react"
+import Image from "next/image"
 import { ProfileSelector } from "@/components/profile-selector"
 import { FileUpload } from "@/components/file-upload"
 import { DataExport } from "@/components/data-export"
@@ -106,7 +106,7 @@ export default function HomePage() {
         <div className="mb-8">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div className="flex items-center gap-2">
-              <PackageSearchIcon className="h-14 w-14 text-black-500 dark:text-white mr-2" />
+              <Image src="/logo.jpg" alt="Company Logo" width={112} height={112} className="mr-2" />
               <div className="flex flex-col">
                 <h1 className="text-4xl font-bold text-gray-900 dark:text-white">PV Tracker</h1>
                 <p className="text-gray-600 dark:text-gray-400 text-sm">v1.0.0-beta</p>
