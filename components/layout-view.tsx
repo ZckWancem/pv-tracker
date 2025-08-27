@@ -4,6 +4,7 @@ import type { Panel, Profile } from "@/lib/db"
 import { DashboardStats } from "@/components/dashboard-stats"
 import { SectionGrid } from "@/components/section-grid"
 import { ScrollArea } from "@/components/ui/scroll-area"
+import { ShareButton } from "./share-button"
 
 interface LayoutViewProps {
   panels: Panel[]
@@ -26,6 +27,7 @@ export function LayoutView({ panels, profiles, selectedProfileId }: LayoutViewPr
         </p>
       </div>
       <DashboardStats totalPanels={totalPanels} scannedPanels={scannedPanels} sections={sections} />
+      {selectedProfileId && <ShareButton profileId={selectedProfileId} />}
       <ScrollArea className="h-[700px] w-full rounded-md border p-4 mt-6">
         <SectionGrid panels={panels} />
       </ScrollArea>
