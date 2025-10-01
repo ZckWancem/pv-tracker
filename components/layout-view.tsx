@@ -1,5 +1,6 @@
 "use client"
 
+import Image from "next/image"
 import type { Panel, Profile } from "@/lib/db"
 import { DashboardStats } from "@/components/dashboard-stats"
 import { SectionGrid } from "@/components/section-grid"
@@ -20,15 +21,25 @@ export function LayoutView({ panels, profiles, selectedProfileId }: LayoutViewPr
 
   return (
     <>
-      <div className="text-center mb-4">
-        <h2 className="text-2xl font-bold">{selectedProfile?.name}</h2>
-        <p className="text-gray-500 dark:text-gray-400 whitespace-pre-line">
-          {selectedProfile?.description}
-        </p>
+      <div className="flex justify-between items-center mb-4">
+        <div style={{ width: "200px" }} />
+        <div className="text-center">
+          <h2 className="text-2xl font-bold">{selectedProfile?.name}</h2>
+          <p className="text-gray-500 dark:text-gray-400 whitespace-pre-line">
+            {selectedProfile?.description}
+          </p>
+        </div>
+        <Image
+          src="/logo-2.jpg"
+          alt="Company Logo"
+          width={200}
+          height={200}
+          className="rounded-sm"
+        />
       </div>
       <DashboardStats totalPanels={totalPanels} scannedPanels={scannedPanels} sections={sections} />
       {selectedProfileId && <ShareButton profileId={selectedProfileId} />}
-      <ScrollArea className="h-[700px] w-full rounded-md border p-4 mt-6">
+      <ScrollArea className="h-[1000px] w-full rounded-md border p-4 mt-6">
         <SectionGrid panels={panels} />
       </ScrollArea>
     </>
