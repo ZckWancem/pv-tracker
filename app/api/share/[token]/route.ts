@@ -11,7 +11,7 @@ export async function GET(
     const { token } = params
 
     const result = await sql`
-      SELECT profile_id, expires_at
+      SELECT profile_id
       FROM share_tokens
       WHERE token = ${token}
     `
@@ -20,11 +20,7 @@ export async function GET(
       return NextResponse.json({ error: "Invalid share token" }, { status: 404 })
     }
 
-    const { profile_id, expires_at } = result[0]
-
-    if (expires_at && new Date() > new Date(expires_at)) {
-      return NextResponse.json({ error: "Share link has expired" }, { status: 410 })
-    }
+    const { profile_id } = result[0]
 
     const [profile] = await sql`
       SELECT * FROM profiles WHERE id = ${profile_id}

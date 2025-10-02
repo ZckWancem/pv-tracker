@@ -15,8 +15,8 @@ export async function POST(request: NextRequest) {
     const token = randomBytes(16).toString("hex")
 
     await sql`
-      INSERT INTO share_tokens (profile_id, token)
-      VALUES (${profileId}, ${token})
+      INSERT INTO share_tokens (profile_id, token, expires_at)
+      VALUES (${profileId}, ${token}, NULL)
     `
 
     return NextResponse.json({ token })

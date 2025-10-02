@@ -172,7 +172,13 @@ export default function HomePage() {
             </TabsContent>
 
             <TabsContent value="layout">
-              <LayoutView panels={panels} profiles={profiles} selectedProfileId={selectedProfileId} />
+              {selectedProfileId && (
+                <LayoutView
+                  panels={panels}
+                  profile={profiles.find(p => p.id === selectedProfileId)!}
+                  showShareButton={true}
+                />
+              )}
             </TabsContent>
 
             <TabsContent value="scan" className="space-y-4">

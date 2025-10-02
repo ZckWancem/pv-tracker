@@ -14,12 +14,11 @@ import {
 
 interface LayoutViewProps {
   panels: Panel[]
-  profiles: Profile[]
-  selectedProfileId: number | null
+  profile: Profile
+  showShareButton?: boolean
 }
 
-export function LayoutView({ panels, profiles, selectedProfileId }: LayoutViewProps) {
-  const selectedProfile = profiles.find((p) => p.id === selectedProfileId)
+export function LayoutView({ panels, profile, showShareButton = false }: LayoutViewProps) {
   const totalPanels = panels.length
   const scannedPanels = panels.filter((p) => p.scanned_at).length
   const sections = [...new Set(panels.filter((p) => p.section).map((p) => p.section!))]
@@ -28,13 +27,14 @@ export function LayoutView({ panels, profiles, selectedProfileId }: LayoutViewPr
     <div className="space-y-6 p-4">
       <div className="flex justify-between items-center">
         <div className="w-[200px] flex justify-center">
-          {selectedProfile?.image_url ? (
+          {profile.image_url ? (
             <Image
-              src={`${selectedProfile.image_url}?t=${Date.now()}`}
+              src={`${profile.image_url}?t=${Date.now()}`}
               alt="Profile Image"
               width={200}
               height={200}
               className="object-cover rounded-lg"
+              priority
             />
           ) : (
             <div className="w-[200px] h-[200px] flex items-center justify-center bg-gray-100 rounded-lg dark:bg-gray-800">
@@ -43,9 +43,9 @@ export function LayoutView({ panels, profiles, selectedProfileId }: LayoutViewPr
           )}
         </div>
         <div className="text-center">
-          <h2 className="text-2xl font-bold">{selectedProfile?.name}</h2>
+          <h2 className="text-2xl font-bold">{profile.name}</h2>
           <p className="text-gray-500 dark:text-gray-400 whitespace-pre-line">
-            {selectedProfile?.description}
+            {profile.description}
           </p>
         </div>
         <Image
@@ -61,7 +61,7 @@ export function LayoutView({ panels, profiles, selectedProfileId }: LayoutViewPr
         scannedPanels={scannedPanels}
         sections={sections}
       />
-      {selectedProfileId && <ShareButton profileId={selectedProfileId} />}
+      {showShareButton && <ShareButton profileId={profile.id} />}
       <ScrollArea className="h-[1000px] w-full rounded-md border p-4">
         <SectionGrid panels={panels} />
       </ScrollArea>
