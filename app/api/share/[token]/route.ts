@@ -22,7 +22,7 @@ export async function GET(
 
     const { profile_id, expires_at } = result[0]
 
-    if (new Date() > new Date(expires_at)) {
+    if (expires_at && new Date() > new Date(expires_at)) {
       return NextResponse.json({ error: "Share link has expired" }, { status: 410 })
     }
 
@@ -40,7 +40,9 @@ export async function GET(
         column_number
     `
 
-    return NextResponse.json({ panels, profile })
+    const response = NextResponse.json({ panels, profile })
+    response.headers.set('Cache-Control', 'no-store, must-revalidate')
+    return response
   } catch (error) {
     console.error("Failed to fetch shared data:", error)
     return NextResponse.json({ error: "Failed to fetch shared data" }, { status: 500 })

@@ -6,6 +6,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import Image from "next/image"
 import { ProfileSelector } from "@/components/profile-selector"
 import { FileUpload } from "@/components/file-upload"
+import { ImageUpload } from "@/components/image-upload"
 import { DataExport } from "@/components/data-export"
 import { Scanner } from "@/components/scanner"
 import { ScanLog, ScanLogEntry } from "@/components/scan-log" // Import ScanLog and ScanLogEntry
@@ -108,8 +109,8 @@ export default function HomePage() {
             <div className="flex items-center gap-2">
               <Image src="/logo.jpg" alt="Company Logo" width={112} height={112} className="mr-2" />
               <div className="flex flex-col">
-                <h1 className="text-4xl font-bold text-gray-900 dark:text-white">PV Tracker</h1>
-                <p className="text-gray-600 dark:text-gray-400 text-sm">v1.0.0-beta</p>
+                <h1 className="text-4xl font-bold text-gray-900 dark:text-white">PV Tracer</h1>
+                <p className="text-gray-600 dark:text-gray-400 text-sm">Created by AstraZ</p>
               </div>
             </div>
             <ProfileSelector
@@ -162,7 +163,10 @@ export default function HomePage() {
             </TabsContent>
 
             <TabsContent value="upload" className="space-y-4">
-              <FileUpload profileId={selectedProfileId} onUploadComplete={handleDataUpdate} />
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <FileUpload profileId={selectedProfileId} onUploadComplete={handleDataUpdate} />
+                <ImageUpload profileId={selectedProfileId} onUploadComplete={handleDataUpdate} />
+              </div>
               <DataExport profileId={selectedProfileId} />
               <PanelsTable panels={panels} onPanelUpdated={handleDataUpdate} />
             </TabsContent>

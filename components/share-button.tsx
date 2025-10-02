@@ -38,7 +38,7 @@ export function ShareButton({ profileId }: ShareButtonProps) {
       }
 
       const { token } = await response.json()
-      const url = `${window.location.origin}/share?token=${token}`
+      const url = `${window.location.origin}/share/${token}`
       setShareUrl(url)
       setIsAlertOpen(true)
     } catch (error) {
@@ -71,7 +71,7 @@ export function ShareButton({ profileId }: ShareButtonProps) {
           <AlertDialogHeader>
             <AlertDialogTitle>Share Layout View</AlertDialogTitle>
             <AlertDialogDescription>
-              Anyone with this link can view the layout. The link will expire in 24 hours.
+              Anyone with this link can view the layout.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <div className="flex items-center space-x-2">

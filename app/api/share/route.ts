@@ -1,4 +1,4 @@
-u7import { type NextRequest, NextResponse } from "next/server"
+import { type NextRequest, NextResponse } from "next/server"
 import { sql } from "@/lib/db"
 import { randomBytes } from "crypto"
 
@@ -13,11 +13,10 @@ export async function POST(request: NextRequest) {
     }
 
     const token = randomBytes(16).toString("hex")
-    const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000) // 24 hours from now
 
     await sql`
-      INSERT INTO share_tokens (profile_id, token, expires_at)
-      VALUES (${profileId}, ${token}, ${expiresAt.toISOString()})
+      INSERT INTO share_tokens (profile_id, token)
+      VALUES (${profileId}, ${token})
     `
 
     return NextResponse.json({ token })
